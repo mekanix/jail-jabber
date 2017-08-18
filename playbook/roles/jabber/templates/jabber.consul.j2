@@ -1,0 +1,7 @@
+{% for item in jabber_consul_templates %}
+template {
+  source = "{{ consul_template_root }}/{{ jabber_consul_template_prefix }}/{{ item.filename }}"
+  destination = "{{ item.destination }}"
+  command = "sh -c 'chown ejabberd:ejabberd {{ item.destination }} && service ejabberd restart || true'"
+}
+{% endfor %}

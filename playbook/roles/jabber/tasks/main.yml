@@ -1,0 +1,30 @@
+---
+- name: install packages
+  with_items: "{{ jabber_packages }}"
+  pkgng:
+    name: "{{ item.name }}"
+
+- name: enable ejabberd service
+  template:
+    src: ejabberd.j2
+    dest: /etc/rc.conf.d/ejabberd
+
+- name: create consul-template directory for jabber
+  file:
+    path: "/usr/local/etc/consul-templates/{{ jabber_consul_template_prefix }}"
+    state: directory
+
+- name: copy jabber consul-template files
+  with_items: "{{ jabber_consul_templates }}"
+  copy:
+    src: "{{ item.filename }}"
+    dest: "{{ consul_template_root }}/{{ jabber_consul_template_prefix }}/{{ item.filename }}"
+  notify:
+    - restart consul-template
+
+- name: configure consul-template for jabber
+  template:
+    src: jabber.consul.j2
+    dest: /usr/local/etc/consul-template.d/jabber.conf
+  notify:
+    - restart consul-template
