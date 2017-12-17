@@ -5,5 +5,5 @@
 - name: SERVICE provisioning
   hosts: SERVICE
   roles:
-    - common
+    - onelove-roles.freebsd-common
     - jabber

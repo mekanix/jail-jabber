@@ -325,7 +325,7 @@ auth_method: ldap
 ##
 ## List of LDAP servers:
 ldap_servers:
-  - "ldap.service.consul"
+  - "ldap.my.domain"
 ##
 ## Encryption of connection to LDAP servers:
 ## ldap_encrypt: none
