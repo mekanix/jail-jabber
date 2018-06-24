@@ -721,7 +721,7 @@ modules:
   ##   interval: 60
   mod_privacy: {}
   mod_private: {}
-  ## mod_proxy65: {}
+  mod_proxy65: {}
   mod_pubsub:
     access_createnode: pubsub_createnode
     ## reduces resource comsumption, but XEP incompliant
