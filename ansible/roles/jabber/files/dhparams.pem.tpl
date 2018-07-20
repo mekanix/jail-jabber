@@ -1,1 +1,1 @@
-{{ key "jabber/dhparams" }}
+{{ key "dhparams" }}

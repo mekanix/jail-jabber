@@ -64,14 +64,6 @@ log_rotate_count: 1
 ## 100 is ejabberd's default.
 log_rate_limit: 100
 
-##
-## watchdog_admins: Only useful for developers: if an ejabberd process
-## consumes a lot of memory, send live notifications to these XMPP
-## accounts.
-##
-## watchdog_admins:
-##   - "bob@example.com"
-
 ###.  ===============
 ###'  NODE PARAMETERS
 
@@ -103,10 +95,26 @@ hosts:{{ $domains := tree "jabber" | byKey }}{{ range $domain, $pairs := $domain
 ##
 ## route_subdomains: s2s
 
-###.  ===============
-###'  LISTENING PORTS
+###.  ============
+###'  Certificates
 
-## Define common macros used by listeners
+## List all available PEM files containing certificates for your domains,
+## chains of certificates or certificate keys. Full chains will be built
+## automatically by ejabberd.
+##
+certfiles:
+  - "/usr/local/etc/ejabberd/ejabberd.pem"
+##
+## If your system provides only a single CA file (CentOS/FreeBSD):
+ca_file: "/etc/ssl/cert.pem"
+
+###.  =================
+###'  TLS configuration
+
+## Note that the following configuration is the default
+## configuration of the TLS driver, so you don't need to
+## uncomment it.
+##
 define_macro:
   'CERTFILE': "/usr/local/etc/ejabberd/ejabberd.pem"
   'CIPHERS': "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CAMELLIA256-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA"
@@ -116,6 +124,16 @@ define_macro:
     - "cipher_server_preference"
     - "no_compression"
   'DHFILE': "/usr/local/etc/ejabberd/dhparams.pem" # generated with: openssl dhparam -out dhparams.pem 2048
+##
+## c2s_dhfile: 'DH_FILE'
+## s2s_dhfile: 'DH_FILE'
+## c2s_ciphers: 'TLS_CIPHERS'
+## s2s_ciphers: 'TLS_CIPHERS'
+## c2s_protocol_options: 'TLS_OPTIONS'
+## s2s_protocol_options: 'TLS_OPTIONS'
+
+###.  ===============
+###'  LISTENING PORTS
 
 ##
 ## listen: The ports ejabberd will listen on, which service each is handled
@@ -124,23 +142,18 @@ define_macro:
 listen:
   -
     port: 5222
-    ip: "{{ range service "jabber" }}{{ .Address }}{{ end }}"
+    ip: "0.0.0.0"
     module: ejabberd_c2s
     ##
     ## If TLS is compiled in and you installed a SSL
-    ## certificate, specify the full path to the
-    ## file and uncomment these lines:
+    ## certificate, uncomment this line:
     ##
     starttls: true
-    certfile: 'CERTFILE'
-    protocol_options: 'TLSOPTS'
-    dhfile: 'DHFILE'
-    ciphers: 'CIPHERS'
     ##
     ## To enforce TLS encryption for client connections,
     ## use this instead of the "starttls" option:
     ##
-    ## starttls_required: true
+    starttls_required: true
     ##
     ## Stream compression
     ##
@@ -149,13 +162,27 @@ listen:
     max_stanza_size: 65536
     shaper: c2s_shaper
     access: c2s
+  ##
+  ## Direct-TLS for C2S (XEP-0368). A good practice is to forward
+  ## traffic from port 443 to this port, possibly multiplexing it
+  ## with HTTP using e.g. sslh [https://wiki.xmpp.org/web/Tech_pages/XEP-0368],
+  ## so modern clients can bypass restrictive firewalls (in airports, hotels, etc.).
+  ##
+  ## -
+  ##   port: 5223
+  ##   ip: "::"
+  ##   module: ejabberd_c2s
+  ##   tls: true
+  ##   max_stanza_size: 65536
+  ##   shaper: c2s_shaper
+  ##   access: c2s
   -
     port: 5269
-    ip: "{{ range service "jabber" }}{{ .Address }}{{ end }}"
+    ip: "0.0.0.0"
     module: ejabberd_s2s_in
   -
     port: 5280
-    ip: "{{ range service "jabber" }}{{ .Address }}{{ end }}"
+    ip: "0.0.0.0"
     module: ejabberd_http
     request_handlers:
       "/ws": ejabberd_http_ws
@@ -165,6 +192,7 @@ listen:
     web_admin: true
     ## register: true
     captcha: true
+
   ##
   ## ejabberd_service: Interact with external components (transports, ...)
   ##
@@ -193,12 +221,10 @@ listen:
   ##
   ## ejabberd_stun: Handles STUN Binding requests
   ##
-  -
-    port: 3478
-    transport: udp
-    module: ejabberd_stun
-    use_turn: true
-    auth_type: anonymous
+  ## -
+  ##   port: 3478
+  ##   transport: udp
+  ##   module: ejabberd_stun
 
   ##
   ## To handle XML-RPC requests that provide admin credentials:
@@ -207,7 +233,12 @@ listen:
   ##   port: 4560
   ##   ip: "::"
   ##   module: ejabberd_xmlrpc
-  ##   access_commands: {}
+  ##   maxsessions: 10
+  ##   timeout: 5000
+  ##   access_commands:
+  ##     admin:
+  ##       commands: all
+  ##       options: []
 
   ##
   ## To enable secure http upload
@@ -219,10 +250,9 @@ listen:
   ##   request_handlers:
   ##     "": mod_http_upload
   ##   tls: true
-  ##   certfile: 'CERTFILE'
-  ##   protocol_options: 'TLSOPTS'
-  ##   dhfile: 'DHFILE'
-  ##   ciphers: 'CIPHERS'
+  ##   protocol_options: 'TLS_OPTIONS'
+  ##   dhfile: 'DH_FILE'
+  ##   ciphers: 'TLS_CIPHERS'
 
 ## Disabling digest-md5 SASL authentication. digest-md5 requires plain-text
 ## password storage (see auth_password_format option).
@@ -233,34 +263,10 @@ listen:
 
 ##
 ## s2s_use_starttls: Enable STARTTLS for S2S connections.
-## Allowed values are: false optional required required_trusted
-## You must specify a certificate file.
+## Allowed values are: false, optional or required
+## You must specify 'certfiles' option
 ##
 s2s_use_starttls: required
-
-##
-## s2s_certfile: Specify a certificate file.
-##
-s2s_certfile: 'CERTFILE'
-
-## Custom OpenSSL options
-##
-s2s_protocol_options: 'TLSOPTS'
-s2s_dhfile: 'DHFILE'
-s2s_ciphers: 'CIPHERS'
-
-
-##
-## domain_certfile: Specify a different certificate for each served hostname.
-##
-## host_config:
-##   "example.org":
-##     domain_certfile: "/path/to/example_org.pem"
-##   "example.com":
-##     domain_certfile: "/path/to/example_com.pem"
-host_config:{{ $domains := tree "jabber" | byKey }}{{ range $domain, $pairs := $domains }}
-  "{{ printf $domain }}":
-    domain_certfile: "/usr/local/etc/ejabberd/ejabberd.pem"{{ end }}
 
 ##
 ## S2S whitelist or blacklist
@@ -289,7 +295,7 @@ host_config:{{ $domains := tree "jabber" | byKey }}{{ range $domain, $pairs := $
 ## If you want to use a different method,
 ## comment this line and enable the correct ones.
 ##
-auth_method: ldap
+## auth_method: internal
 
 ##
 ## Store the plain passwords or hashed for SCRAM:
@@ -321,11 +327,11 @@ auth_method: ldap
 ##
 ## Authentication using LDAP
 ##
-## auth_method: ldap
+auth_method: ldap
 ##
 ## List of LDAP servers:
 ldap_servers:
-  - "ldap.my.domain"
+  - "ldap"
 ##
 ## Encryption of connection to LDAP servers:
 ## ldap_encrypt: none
@@ -432,6 +438,19 @@ ldap_filter: "(&(objectClass=person)(userClass=jabber))"
 ##
 ## sql_keepalive_interval: undefined
 
+##
+## Use the new SQL schema
+##
+## new_sql_schema: true
+
+##
+## A database can also can be used to store information from several
+## modules. To enable storage to the database, just make sure it is
+## setup above and set default_db: sql if you want to use SQL for
+## all modules.
+##
+## default_db: sql
+
 ###.  ===============
 ###'  TRAFFIC SHAPERS
 
@@ -450,7 +469,7 @@ shaper:
 ## This option specifies the maximum number of elements in the queue
 ## of the FSM. Refer to the documentation for details.
 ##
-max_fsm_queue: 1000
+max_fsm_queue: 10000
 
 ###.   ====================
 ###'   ACCESS CONTROL LISTS
@@ -655,7 +674,7 @@ language: "en"
 ##
 ## Full path to a script that generates the image.
 ##
-## captcha_cmd: "/lib/ejabberd/priv/bin/captcha.sh"
+## captcha_cmd: "/usr/local/share/ejabberd/captcha.sh"
 
 ##
 ## Host for the URL and port where ejabberd listens for CAPTCHA requests.
@@ -666,6 +685,36 @@ language: "en"
 ## Limit CAPTCHA calls per minute for JID/IP to avoid DoS.
 ##
 ## captcha_limit: 5
+
+###.  ====
+###'  ACME
+##
+## In order to use the acme certificate acquiring through "Let's Encrypt"
+## an http listener has to be configured to listen to port 80 so that
+## the authorization challenges posed by "Let's Encrypt" can be solved.
+##
+## A simple way of doing this would be to add the following in the listening
+## section and to configure port forwarding from 80 to 5280 either via NAT
+## (for ipv4 only) or using frontends such as haproxy/nginx/sslh/etc.
+##   -
+##    port: 5280
+##    ip: "::"
+##    module: ejabberd_http
+
+acme:
+
+   ## A contact mail that the ACME Certificate Authority can contact in case of
+   ## an authorization issue, such as a server-initiated certificate revocation.
+   ## It is not mandatory to provide an email address but it is highly suggested.
+   contact: "mailto:example-admin@example.com"
+
+
+   ## The ACME Certificate Authority URL.
+   ## This could either be:
+   ##   - https://acme-v01.api.letsencrypt.org - (Default) for the production CA
+   ##   - https://acme-staging.api.letsencrypt.org - for the staging CA
+   ##   - http://localhost:4000 - for a local version of the CA
+   ca_url: "https://acme-v01.api.letsencrypt.org"
 
 ###.  =======
 ###'  MODULES
@@ -686,7 +735,6 @@ modules:
   ## mod_delegation: {} # for xep0356
   mod_disco: {}
   mod_echo: {}
-  mod_irc: {}
   mod_bosh: {}
   ## mod_http_fileserver:
   ##   docroot: "/var/www"
@@ -694,7 +742,7 @@ modules:
   ## mod_http_upload:
   ##   # docroot: "@HOME@/upload"
   ##   put_url: "https://@HOST@:5444"
-  ##   thumbnail: false # otherwise needs the identify command from ImageMagick installed
+  ##   thumbnail: false # otherwise needs ejabberd to be compiled with libgd support
   ## mod_http_upload_quota:
   ##   max_days: 30
   mod_last: {}
@@ -711,7 +759,7 @@ modules:
     access_create: muc_create
     access_persistent: muc_create
   mod_muc_admin: {}
-  ## mod_muc_log: {}
+  mod_muc_log: {}
   ## mod_multicast: {}
   mod_offline:
     access_max_user_messages: max_user_offline_messages
@@ -733,6 +781,15 @@ modules:
       - "flat"
       - "hometree"
       - "pep" # pep requires mod_caps
+    force_node_config:
+      ## Avoid using OMEMO by default because it
+      ## introduces a lot of hard-to-track problems.
+      ## Comment out the following lines to enable OMEMO support
+      "eu.siacs.conversations.axolotl.*":
+        access_model: whitelist
+      ## Avoid buggy clients to make their bookmarks public
+      "storage:bookmarks":
+        access_model: whitelist
   mod_push: {}
   mod_push_keepalive: {}
   ## mod_register:
@@ -774,6 +831,8 @@ modules:
   mod_time: {}
   mod_vcard:
     search: false
+  mod_vcard_xupdate: {}
+  mod_avatar: {}
   mod_version: {}
   mod_stream_mgmt: {}
   ##   Non-SASL Authentication (XEP-0078) is now disabled by default
@@ -784,9 +843,10 @@ modules:
   ##   rely solely on dialback if you want to federate with other servers,
   ##   because a lot of servers have dialback disabled and instead rely on
   ##   PKIX authentication. Make sure you have proper certificates installed
-  ##   and check your accessibility at https://xmpp.net/
+  ##   and check your accessibility at https://check.messaging.one/
   mod_s2s_dialback: {}
   mod_http_api: {}
+  mod_fail2ban: {}
 
 ##
 ## Enable modules with custom options in a specific virtual host
@@ -811,3 +871,4 @@ allow_contrib_modules: true
 ### mode: yaml
 ### End:
 ### vim: set filetype=yaml tabstop=8 foldmarker=###',###. foldmethod=marker:
+
