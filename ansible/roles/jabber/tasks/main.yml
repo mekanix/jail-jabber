@@ -3,6 +3,8 @@
   with_items: "{{ jabber_packages }}"
   pkgng:
     name: "{{ item.name }}"
+  notify:
+    - restart ejabberd
 
 - name: enable ejabberd service
   template:
@@ -14,3 +16,5 @@
   template:
     src: "{{ item.filename }}.tpl"
     dest: "{{ item.destination }}/{{ item.filename }}"
+  notify:
+    - restart ejabberd
