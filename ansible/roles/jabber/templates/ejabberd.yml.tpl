@@ -46,12 +46,12 @@ loglevel: 4
 ## To disable rotation set the size to 0 and the date to ""
 ## Date syntax is taken from the syntax newsyslog uses in newsyslog.conf.
 ## Some examples:
-##  $D0     rotate every night at midnight
-##  $D23    rotate every day at 23:00 hr
-##  $W0D23  rotate every week on Sunday at 23:00 hr
-##  $W5D16  rotate every week on Friday at 16:00 hr
-##  $M1D0   rotate on the first day of every month at midnight
-##  $M5D6   rotate on every 5th day of the month at 6:00 hr
+##  \$D0     rotate every night at midnight
+##  \$D23    rotate every day at 23:00 hr
+##  \$W0D23  rotate every week on Sunday at 23:00 hr
+##  \$W5D16  rotate every week on Friday at 16:00 hr
+##  \$M1D0   rotate on the first day of every month at midnight
+##  \$M5D6   rotate on every 5th day of the month at 6:00 hr
 ##
 log_rotate_size: 10485760
 log_rotate_date: ""
@@ -85,8 +85,8 @@ log_rate_limit: 100
 ##   - "example.com"
 ##   - "example.org"
 ##
-hosts:{{ $domains := tree "jabber" | byKey }}{{ range $domain, $pairs := $domains }}
-  - "{{ printf $domain }}"{{ end }}
+hosts:
+  - "{{ jabber_domain }}"
 
 ##
 ## route_subdomains: Delegate subdomains to other XMPP servers.
@@ -348,7 +348,7 @@ ldap_servers:
 ## ldap_password: "******"
 ##
 ## Search base of LDAP directory:
-ldap_base: {{ $domains := tree "jabber" | byKey }}{{ range $domain, $pairs := $domains }}"ou={{ printf $domain }},dc=ldap"{{ end }}
+ldap_base: "ou={{ jabber_domain }},dc=ldap"
 ##
 ## LDAP attribute that holds user ID:
 ldap_uids:

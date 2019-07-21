@@ -2,17 +2,9 @@
 jabber_packages:
   - name: ejabberd
 
-jabber_consul_template_prefix: jabber
+jabber_templates:
+  - destination: /usr/local/etc/ejabberd
+    filename: ejabberd.yml
 
-jabber_consul_templates:
-  - destination: /usr/local/etc/ejabberd/ejabberd.yml
-    filename: ejabberd.yml.tpl
-
-  - destination: /usr/local/etc/ejabberd/ejabberdctl.cfg
-    filename: ejabberdctl.cfg.tpl
-
-  - destination: /usr/local/etc/ejabberd/ejabberd.pem
-    filename: ejabberd.pem.tpl
-
-  - destination: /usr/local/etc/ejabberd/dhparams.pem
-    filename: dhparams.pem.tpl
+  - destination: /usr/local/etc/ejabberd
+    filename: ejabberdctl.cfg

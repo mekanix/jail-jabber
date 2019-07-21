@@ -9,22 +9,8 @@
     src: ejabberd.j2
     dest: /etc/rc.conf.d/ejabberd
 
-- name: create consul-template directory for jabber
-  file:
-    path: "/usr/local/etc/consul-templates/{{ jabber_consul_template_prefix }}"
-    state: directory
-
-- name: copy jabber consul-template files
-  with_items: "{{ jabber_consul_templates }}"
-  copy:
-    src: "{{ item.filename }}"
-    dest: "{{ consul_template_root }}/{{ jabber_consul_template_prefix }}/{{ item.filename }}"
-  notify:
-    - restart consul-template
-
-- name: configure consul-template for jabber
+- name: configure ejabber
+  with_items: "{{ jabber_templates }}"
   template:
-    src: jabber.consul.j2
-    dest: /usr/local/etc/consul-template.d/jabber.conf
-  notify:
-    - restart consul-template
+    src: "{{ item.filename }}.tpl"
+    dest: "{{ item.destination }}/{{ item.filename }}"
