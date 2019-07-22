@@ -1,10 +1,13 @@
 .provisioned
 *.retry
+
 ansible/group_vars/all
 ansible/inventory/inventory
 ansible/site.yml
-ansible/roles/onelove-roles.freebsd-common/
-ansible/roles/onelove-roles.freebsd-consul-template/
+ansible/roles/*
+!ansible/roles/jabber
+
+templates/fstab
 build/
 cbsd.conf
 vars.mk
