@@ -170,18 +170,6 @@ listen:
     port: 5269
     ip: "0.0.0.0"
     module: ejabberd_s2s_in
-  -
-    port: 5280
-    ip: "0.0.0.0"
-    module: ejabberd_http
-    request_handlers:
-      "/ws": ejabberd_http_ws
-      "/bosh": mod_bosh
-      "/api": mod_http_api
-    ##  "/pub/archive": mod_http_fileserver
-    web_admin: true
-    ## register: true
-    captcha: true
 
   ##
   ## ejabberd_service: Interact with external components (transports, ...)
