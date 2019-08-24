@@ -18,3 +18,31 @@
     dest: "{{ item.destination }}/{{ item.filename }}"
   notify:
     - restart ejabberd
+
+- name: create certs dir
+  file:
+    name: /usr/local/etc/ejabberd/certs
+    mode: 0700
+    owner: ejabberd
+    group: ejabberd
+    state: directory
+
+- name: install cert updater
+  copy:
+    src: update_certs.sh
+    dest: /usr/local/bin/update_certs.sh
+    mode: 0755
+
+- name: check if hosts file exists
+  stat:
+    path: /usr/local/etc/ejabberd/hosts.yml
+  register: secret_result
+
+- name: create hosts file if it does not exists
+  template:
+    src: hosts.yml.j2
+    dest: /usr/local/etc/ejabberd/hosts.yml
+    mode: 0644
+  when: secret_result.stat.exists == False
+  notify:
+    - restart ejabberd

@@ -85,8 +85,7 @@ log_rate_limit: 100
 ##   - "example.com"
 ##   - "example.org"
 ##
-hosts:
-  - "{{ jabber_domain }}"
+include_config_file: "/usr/local/etc/ejabberd/hosts.yml"
 
 ##
 ## route_subdomains: Delegate subdomains to other XMPP servers.
@@ -103,7 +102,7 @@ hosts:
 ## automatically by ejabberd.
 ##
 certfiles:
-  - "/usr/local/etc/ejabberd/ejabberd.pem"
+  - "/usr/local/etc/ejabberd/certs/cert.pem"
 ##
 ## If your system provides only a single CA file (CentOS/FreeBSD):
 ca_file: "/etc/ssl/cert.pem"
@@ -115,15 +114,6 @@ ca_file: "/etc/ssl/cert.pem"
 ## configuration of the TLS driver, so you don't need to
 ## uncomment it.
 ##
-define_macro:
-  'CERTFILE': "/usr/local/etc/ejabberd/ejabberd.pem"
-  'CIPHERS': "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CAMELLIA256-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA"
-  'TLSOPTS':
-    - "no_sslv3"
-    - "no_tlsv1"
-    - "cipher_server_preference"
-    - "no_compression"
-  'DHFILE': "/usr/local/etc/ejabberd/dhparams.pem" # generated with: openssl dhparam -out dhparams.pem 2048
 ##
 ## c2s_dhfile: 'DH_FILE'
 ## s2s_dhfile: 'DH_FILE'
@@ -352,7 +342,7 @@ ldap_base: "ou={{ jabber_domain }},dc=ldap"
 ##
 ## LDAP attribute that holds user ID:
 ldap_uids:
-  - "uid": "%u"
+  "uid": "%u"
 ##
 ## LDAP filter:
 ldap_filter: "(&(objectClass=person)(userClass=jabber))"
