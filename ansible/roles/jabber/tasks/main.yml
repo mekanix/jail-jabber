@@ -46,3 +46,6 @@
   when: secret_result.stat.exists == False
   notify:
     - restart ejabberd
+
+- name: generate ejabberd cert
+  shell: update_certs.sh "{{ jabber_domain }}"
