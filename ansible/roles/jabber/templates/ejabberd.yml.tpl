@@ -763,8 +763,8 @@ modules:
       ## Avoid using OMEMO by default because it
       ## introduces a lot of hard-to-track problems.
       ## Comment out the following lines to enable OMEMO support
-      "eu.siacs.conversations.axolotl.*":
-        access_model: whitelist
+      ## "eu.siacs.conversations.axolotl.*":
+      ##   access_model: whitelist
       ## Avoid buggy clients to make their bookmarks public
       "storage:bookmarks":
         access_model: whitelist
