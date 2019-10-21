@@ -221,16 +221,13 @@ listen:
   ##
   ## To enable secure http upload
   ##
-  ## -
-  ##   port: 5444
-  ##   ip: "::"
-  ##   module: ejabberd_http
-  ##   request_handlers:
-  ##     "": mod_http_upload
-  ##   tls: true
-  ##   protocol_options: 'TLS_OPTIONS'
-  ##   dhfile: 'DH_FILE'
-  ##   ciphers: 'TLS_CIPHERS'
+  -
+    port: 5444
+    ip: "0.0.0.0"
+    module: ejabberd_http
+    request_handlers:
+      "": mod_http_upload
+    tls: true
 
 ## Disabling digest-md5 SASL authentication. digest-md5 requires plain-text
 ## password storage (see auth_password_format option).
@@ -326,11 +323,11 @@ ldap_servers:
 ## ldap_password: "******"
 ##
 ## Search base of LDAP directory:
-ldap_base: "ou={{ jabber_domain }},dc=ldap"
+ldap_base: "dc=ldap"
 ##
 ## LDAP attribute that holds user ID:
 ldap_uids:
-  "uid": "%u"
+  "mail": "%u@%d"
 ##
 ## LDAP filter:
 ldap_filter: "(&(objectClass=person)(userClass=jabber))"
@@ -522,7 +519,7 @@ shaper_rules:
   ## Maximum number of offline messages that users can have:
   max_user_offline_messages:
     - 5000: admin
-    - 100
+    - 1000
   ## For C2S connections, all users except admins use the "normal" shaper
   c2s_shaper:
     - none: admin
@@ -679,21 +676,6 @@ language: "en"
 ##    ip: "::"
 ##    module: ejabberd_http
 
-acme:
-
-   ## A contact mail that the ACME Certificate Authority can contact in case of
-   ## an authorization issue, such as a server-initiated certificate revocation.
-   ## It is not mandatory to provide an email address but it is highly suggested.
-   contact: "mailto:example-admin@example.com"
-
-
-   ## The ACME Certificate Authority URL.
-   ## This could either be:
-   ##   - https://acme-v01.api.letsencrypt.org - (Default) for the production CA
-   ##   - https://acme-staging.api.letsencrypt.org - for the staging CA
-   ##   - http://localhost:4000 - for a local version of the CA
-   ca_url: "https://acme-v01.api.letsencrypt.org"
-
 ###.  =======
 ###'  MODULES
 
@@ -712,14 +694,13 @@ modules:
   mod_configure: {} # requires mod_adhoc
   ## mod_delegation: {} # for xep0356
   mod_disco: {}
-  mod_echo: {}
   mod_bosh: {}
   ## mod_http_fileserver:
   ##   docroot: "/var/www"
   ##   accesslog: "/var/log/ejabberd/access.log"
-  ## mod_http_upload:
-  ##   # docroot: "@HOME@/upload"
-  ##   put_url: "https://@HOST@:5444"
+  mod_http_upload:
+    docroot: "@HOME@/upload"
+    put_url: "https://@HOST@:5444"
   ##   thumbnail: false # otherwise needs ejabberd to be compiled with libgd support
   ## mod_http_upload_quota:
   ##   max_days: 30
@@ -757,14 +738,13 @@ modules:
     last_item_cache: false
     plugins:
       - "flat"
-      - "hometree"
       - "pep" # pep requires mod_caps
     force_node_config:
       ## Avoid using OMEMO by default because it
       ## introduces a lot of hard-to-track problems.
       ## Comment out the following lines to enable OMEMO support
-      "eu.siacs.conversations.axolotl.*":
-        access_model: whitelist
+      ## "eu.siacs.conversations.axolotl.*":
+      ##   access_model: whitelist
       ## Avoid buggy clients to make their bookmarks public
       "storage:bookmarks":
         access_model: whitelist

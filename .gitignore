@@ -11,3 +11,4 @@ templates/fstab
 build/
 cbsd.conf
 vars.mk
+project.mk
