@@ -1,5 +1,5 @@
 ---
-- name: restart ejabberd
+- name: restart prosody
   service:
-    name: ejabberd
+    name: prosody
     state: restarted

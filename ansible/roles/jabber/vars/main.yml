@@ -1,10 +1,5 @@
 ---
 jabber_packages:
-  - name: ejabberd
-
-jabber_templates:
-  - destination: /usr/local/etc/ejabberd
-    filename: ejabberd.yml
-
-  - destination: /usr/local/etc/ejabberd
-    filename: ejabberdctl.cfg
+  - name: lua51-lualdap
+  - name: prosody
+  - name: prosody-modules

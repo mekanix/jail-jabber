@@ -1,31 +1,15 @@
 ---
 - name: install packages
   with_items: "{{ jabber_packages }}"
-  pkgng:
+  package:
     name: "{{ item.name }}"
   notify:
-    - restart ejabberd
+    - restart prosody
 
-- name: enable ejabberd service
+- name: enable prosody service
   template:
-    src: ejabberd.j2
-    dest: /etc/rc.conf.d/ejabberd
-
-- name: configure ejabber
-  with_items: "{{ jabber_templates }}"
-  template:
-    src: "{{ item.filename }}.tpl"
-    dest: "{{ item.destination }}/{{ item.filename }}"
-  notify:
-    - restart ejabberd
-
-- name: create certs dir
-  file:
-    name: /usr/local/etc/ejabberd/certs
-    mode: 0700
-    owner: ejabberd
-    group: ejabberd
-    state: directory
+    src: prosody.j2
+    dest: /etc/rc.conf.d/prosody
 
 - name: install cert updater
   copy:
@@ -33,19 +17,25 @@
     dest: /usr/local/bin/update_certs.sh
     mode: 0755
 
-- name: check if hosts file exists
-  stat:
-    path: /usr/local/etc/ejabberd/hosts.yml
-  register: secret_result
+- name: convert cert from letsencrypt
+  command: /usr/local/bin/update_certs.sh "{{ jabber_domain }}"
+  args:
+    creates: "/usr/local/etc/prosody/certs/{{ jabber_domain }}.key"
 
-- name: create hosts file if it does not exists
+- name: create log and run dirs
+  with_items:
+    - log
+    - run
+  file:
+    name: "/var/{{ item }}/prosody"
+    mode: 0755
+    owner: prosody
+    group: prosody
+    state: directory
+
+- name: configure prosody
   template:
-    src: hosts.yml.j2
-    dest: /usr/local/etc/ejabberd/hosts.yml
-    mode: 0644
-  when: secret_result.stat.exists == False
+    src: prosody.cfg.lua.j2
+    dest: /usr/local/etc/prosody/prosody.cfg.lua
   notify:
-    - restart ejabberd
-
-- name: generate ejabberd cert
-  shell: update_certs.sh "{{ jabber_domain }}"
+    - restart prosody

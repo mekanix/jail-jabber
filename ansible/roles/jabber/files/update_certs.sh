@@ -6,8 +6,9 @@ if [ -z "${DOMAIN}" ]; then
   exit 1
 fi
 
-cat /etc/certs/$1/privkey.pem >/usr/local/etc/ejabberd/certs/cert.pem
-cat /etc/certs/$1/cert.pem >>/usr/local/etc/ejabberd/certs/cert.pem
-cat /etc/certs/$1/fullchain.pem >>/usr/local/etc/ejabberd/certs/cert.pem
-chown ejabberd:ejabberd /usr/local/etc/ejabberd/certs/cert.pem
-chmod 600 /usr/local/etc/ejabberd/certs/cert.pem
+cat /etc/certs/${DOMAIN}/privkey.pem >/usr/local/etc/prosody/certs/${DOMAIN}.key
+cat /etc/certs/${DOMAIN}/fullchain.pem >/usr/local/etc/prosody/certs/${DOMAIN}.crt
+chown prosody:prosody /usr/local/etc/prosody/certs/${DOMAIN}.*
+chmod 600 /usr/local/etc/prosody/certs/${DOMAIN}.*
+service prosody reload
+exit 0
