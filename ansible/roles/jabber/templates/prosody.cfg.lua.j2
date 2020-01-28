@@ -59,6 +59,13 @@ authentication = "ldap"
 ldap_server = "ldap"
 ldap_filter = "(&(uid=$user)(userClass=jabber))"
 
+http_upload_file_size_limit = 10485760
+https_certificate = "certs/{{ jabber_domain }}.crt"
+https_ports = { 5281 }
+https_interfaces = { "*", "::" }
+http_upload_file_size_limit = 10485760
+http_upload_path = "/var/cache/prosody"
+
 log = {
     info = "/var/log/prosody/prosody.log"; -- Change 'info' to 'debug' for verbose logging
     error = "/var/log/prosody/prosody.err";
@@ -66,7 +73,8 @@ log = {
 
 VirtualHost "{{ jabber_domain }}"
     ldap_base = "ou={{ jabber_domain }},dc=ldap"
-    -- certificate = "/path/to/{{ jabber_domain }}.crt"
 
 Component "conference.{{ jabber_domain }}" "muc"
 modules_enabled = { "muc_mam" }
+
+Component "upload.{{ jabber_domain }}" "http_upload"
