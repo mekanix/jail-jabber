@@ -71,6 +71,10 @@ log = {
     error = "/var/log/prosody/prosody.err";
 }
 
+ssl = {
+    cafile = "/etc/ssl/cert.pem";
+}
+
 VirtualHost "{{ jabber_domain }}"
     ldap_base = "ou={{ jabber_domain }},dc=ldap"
 
