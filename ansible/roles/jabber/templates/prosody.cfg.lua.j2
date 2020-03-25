@@ -58,6 +58,7 @@ certificates = "certs"
 authentication = "ldap"
 ldap_server = "ldap"
 ldap_filter = "(&(uid=$user)(userClass=jabber))"
+ldap_tls = true
 
 http_upload_file_size_limit = 10485760
 https_certificate = "certs/{{ jabber_domain }}.crt"
