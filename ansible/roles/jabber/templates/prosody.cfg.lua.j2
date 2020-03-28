@@ -52,11 +52,11 @@ c2s_require_encryption = true
 s2s_require_encryption = true
 s2s_secure_auth = false
 pidfile = "/var/run/prosody/prosody.pid"
-archive_expires_after = "4w" -- Remove archived messages after 1 week
+archive_expires_after = "4w" -- Remove archived messages after 4 weeks
 certificates = "certs"
 
 authentication = "ldap"
-ldap_server = "ldap"
+ldap_server = "ldap.{{ jabber_domain }}"
 ldap_filter = "(&(uid=$user)(userClass=jabber))"
 ldap_tls = true
 
