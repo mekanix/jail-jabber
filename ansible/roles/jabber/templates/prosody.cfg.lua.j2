@@ -45,6 +45,7 @@ modules_enabled = {
         --"motd"; -- Send a message to users when they log in
         --"legacyauth"; -- Legacy authentication. Only used by some old clients and bots.
         "proxy65"; -- Enables a file transfer proxy service which clients behind NAT can use
+        "turncredentials";
 }
 
 allow_registration = false
@@ -54,6 +55,8 @@ s2s_secure_auth = false
 pidfile = "/var/run/prosody/prosody.pid"
 archive_expires_after = "4w" -- Remove archived messages after 4 weeks
 certificates = "certs"
+turncredentials_host = "turn.{{ jabber_domain }}"
+turncredentials_secret = "Sekrit"
 
 authentication = "ldap"
 ldap_server = "ldap.{{ jabber_domain }}"
