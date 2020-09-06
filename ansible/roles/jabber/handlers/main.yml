@@ -1,5 +1,5 @@
 ---
-- name: restart prosody
+- name: restart jabber
   service:
-    name: prosody
+    name: ejabberd
     state: restarted

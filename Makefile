@@ -1,6 +1,6 @@
 SERVICE = jabber
 REGGAE_PATH = /usr/local/share/reggae
-PORTS = 5000 5222 5269 5280 5281
+PORTS = 3478 5222 5269 5280 7777 49152:65535
 
 post_setup_ansible:
 	@echo "jabber_domain: ${FQDN}" >>ansible/group_vars/all
