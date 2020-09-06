@@ -1,15 +1,18 @@
 ---
+- name: Get my public IP
+  ipify_facts:
+
 - name: install packages
   with_items: "{{ jabber_packages }}"
   package:
     name: "{{ item.name }}"
   notify:
-    - restart prosody
+    - restart jabber
 
-- name: enable prosody service
+- name: enable jabber service
   template:
-    src: prosody.j2
-    dest: /etc/rc.conf.d/prosody
+    src: ejabberd.j2
+    dest: /etc/rc.conf.d/ejabberd
 
 - name: install cert updater
   copy:
@@ -17,25 +20,22 @@
     dest: /usr/local/bin/update_certs.sh
     mode: 0755
 
+- name: create certs dir
+  file:
+    name: "/usr/local/etc/ejabberd/certs"
+    mode: 0700
+    owner: ejabberd
+    group: ejabberd
+    state: directory
+
 - name: convert cert from letsencrypt
   command: /usr/local/bin/update_certs.sh "{{ jabber_domain }}"
   args:
-    creates: "/usr/local/etc/prosody/certs/{{ jabber_domain }}.key"
+    creates: "/usr/local/etc/ejabberd/certs/{{ jabber_domain }}.key"
 
-- name: create log and run dirs
-  with_items:
-    - log
-    - run
-  file:
-    name: "/var/{{ item }}/prosody"
-    mode: 0755
-    owner: prosody
-    group: prosody
-    state: directory
-
-- name: configure prosody
+- name: configure jabber
   template:
-    src: prosody.cfg.lua.j2
-    dest: /usr/local/etc/prosody/prosody.cfg.lua
+    src: ejabberd.yml.j2
+    dest: /usr/local/etc/ejabberd/ejabberd.yml
   notify:
-    - restart prosody
+    - restart jabber

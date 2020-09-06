@@ -1,5 +1,3 @@
 ---
 jabber_packages:
-  - name: lua52-lualdap
-  - name: prosody
-  - name: prosody-modules
+  - name: ejabberd
