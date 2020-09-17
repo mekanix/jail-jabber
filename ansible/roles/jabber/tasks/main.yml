@@ -28,6 +28,14 @@
     group: ejabberd
     state: directory
 
+- name: create upload dir
+  file:
+    name: "/var/cache/ejabberd"
+    mode: 0700
+    owner: ejabberd
+    group: ejabberd
+    state: directory
+
 - name: convert cert from letsencrypt
   command: /usr/local/bin/update_certs.sh "{{ jabber_domain }}"
   args:
