@@ -205,7 +205,7 @@ auth_method: ldap
 ldap_servers:
   - "ldap.{{ jabber_domain }}"
 ldap_encrypt: tls
-ldap_base: "dc=ldap"
+ldap_base: "dc=account,dc=ldap"
 ldap_uids:
   "mail": "%u@%d"
 ldap_filter: "(&(objectClass=person)(userClass=jabber))"
